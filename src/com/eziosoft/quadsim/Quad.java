@@ -2,10 +2,15 @@ package com.eziosoft.quadsim;
 
 import java.util.Random;
 
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Paint.Style;
+import android.graphics.RectF;
 
 public class Quad {
 
@@ -24,8 +29,12 @@ public class Quad {
 	Paint			p, p3;
 
 	public float	GroundLevel	= 600;
+	Context			context;
+	Bitmap			b1, b2;
 
-	public Quad(float groundLevel, float ww, float hh) {
+	public Quad(Context context, float groundLevel, float ww, float hh) {
+
+		this.context = context;
 		p = new Paint();
 		p.setColor(Color.GREEN);
 
@@ -40,6 +49,9 @@ public class Quad {
 		p3.setAntiAlias(true);
 		p3.setStyle(Style.FILL_AND_STROKE);
 		p3.setStrokeWidth(4);
+
+		b1 = BitmapFactory.decodeResource(context.getResources(), R.drawable.q1);
+		b2 = BitmapFactory.decodeResource(context.getResources(), R.drawable.q2);
 	}
 
 	public void SET(float m1, float m2) {
@@ -72,7 +84,6 @@ public class Quad {
 	}
 
 	private void Phisics() {
-
 		vr = (m1 - m2) + vr;
 		r += vr;
 		if (r > 360)
@@ -86,31 +97,47 @@ public class Quad {
 
 		if (y > GroundLevel) {
 			y = GroundLevel;
+			r = 0;
+			vr=0;
 		}
 		else {
 			vy += g;
+			x += vx;
 		}
 
 		alt = GroundLevel - y;
 		Roll = r;
-
 	}
 
+	Boolean	a	= false;
+
 	public void DrawQuad(Canvas c) {
+		float scale = 0.3f;
 		Phisics();
-		c.drawCircle(x, y, 6, p3);
 
 		float x1, y1, x2, y2;
-		x1 = (float) (x + 40 * Math.cos(r * Math.PI / 180));
-		x2 = (float) (x + 40 * Math.cos((180 + r) * Math.PI / 180));
+		x1 = (float) (x + b1.getWidth() / 2 * scale / 2 * Math.cos(r * Math.PI / 180));
+		x2 = (float) (x + b1.getWidth() / 2 * scale / 2 * Math.cos((180 + r) * Math.PI / 180));
 
-		y1 = (float) (y + 40 * Math.sin(r * Math.PI / 180));
-		y2 = (float) (y + 40 * Math.sin((180 + r) * Math.PI / 180));
-
-		c.drawLine(x1, y1, x2, y2, p3);
+		y1 = (float) (y + b1.getWidth() / 2 * scale / 2 * Math.sin(r * Math.PI / 180));
+		y2 = (float) (y + b1.getWidth() / 2 * scale / 2 * Math.sin((180 + r) * Math.PI / 180));
 
 		c.drawCircle(x1, y1, 10 * m2, p);
 		c.drawCircle(x2, y2, 10 * m1, p);
 
+		Matrix matrix = new Matrix();
+
+		matrix.preRotate(r, x, y);
+		matrix.preTranslate(x - b1.getWidth() / 2 * scale, y - b1.getHeight() * scale);
+		matrix.preScale(scale, scale);
+
+		if (a) {
+			c.drawBitmap(b1, matrix, new Paint());
+			a = !a;
+		}
+		else {
+			c.drawBitmap(b2, matrix, new Paint());
+			a = !a;
+		}
 	}
 }

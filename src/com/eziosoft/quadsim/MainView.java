@@ -60,7 +60,7 @@ public class MainView extends View {
 		this.setBackgroundColor(Color.BLACK);
 
 		GroundLevel = hh - 100;
-		quad = new Quad(GroundLevel, ww, hh);
+		quad = new Quad(getContext(), GroundLevel, ww, hh);
 
 	}
 
